@@ -6,6 +6,8 @@ from database_setup import Restaurant, Base, MenuItem
 engine = create_engine('sqlite:///restaurantmenu.db')
 # Bind the engine to the metadata of the Base class so that the
 # declaratives can be accessed through a DBSession instance
+
+Base.metadata.create_all(engine)
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
