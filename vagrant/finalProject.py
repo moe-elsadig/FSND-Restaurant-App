@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Restaurant, MenuItem
@@ -38,7 +38,8 @@ deleteMenuItem()      :   /restaurant/restaurant_id/menu/menu_id/delete
 @app.route('/')
 @app.route('/restaurants/')
 def showRestaurants():
-    return "all restaurants"
+    restaurants = session.query(Restaurant).all()
+    return render_template('restaurants.html',restaurants=restaurants)
 
 @app.route('/restaurant/new/')
 def newRestaurant():
