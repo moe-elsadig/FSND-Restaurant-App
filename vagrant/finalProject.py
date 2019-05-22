@@ -43,7 +43,8 @@ def showRestaurants():
 
 @app.route('/restaurant/new/')
 def newRestaurant():
-    return "new restaurant"
+
+    return render_template('editMenuItem.html',restaurants="")
 
 @app.route('/restaurant/restaurant_id/edit/')
 def editRestaurant():
@@ -64,7 +65,8 @@ def newMenuItem():
 
 @app.route('/restaurant/restaurant_id/menu/menu_id/edit')
 def editMenuItem():
-    return "edit Menu Item"
+
+    return render_template('editMenuItem.html',restaurants="")
 
 @app.route('/restaurant/restaurant_id/menu/menu_id/delete')
 def deleteMenuItem():
