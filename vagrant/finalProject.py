@@ -45,29 +45,32 @@ def showRestaurants():
 def newRestaurant():
     return render_template('newRestaurant.html')
 
-@app.route('/restaurant/restaurant_id/edit/')
-def editRestaurant():
-    return "edit restaurant"
+@app.route('/restaurant/<int:restaurant_id>/edit/')
+def editRestaurant(restaurant_id):
+    return render_template('editRestaurant.html')
 
-@app.route('/restaurant/restaurant_id/delete/')
-def deleteRestaurant():
-    return "delete restaurant"
+@app.route('/restaurant/<int:restaurant_id>/delete/')
+def deleteRestaurant(restaurant_id):
+    return render_template('deleteRestaurant.html')
 
-@app.route('/restaurant/restaurant_id/')
-@app.route('/restaurant/restaurant_id/menu/')
-def showMenu():
-    return "menu"
+@app.route('/restaurant/<int:restaurant_id>/')
+@app.route('/restaurant/<int:restaurant_id>/menu/')
+def showMenu(restaurant_id):
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    menu = session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
+    return render_template("menu.html", restaurant_id=restaurant_id, menu=menu)
 
-@app.route('/restaurant/restaurant_id/menu/new/')
-def newMenuItem():
-    return "new Menu Item"
+@app.route('/restaurant/<int:restaurant_id>/menu/new/')
+def newMenuItem(restaurant_id):
+    restaurant_id = session.query(Restaurant).filter_by(id=restaurant_id).one().id
+    return render_template('newMenuItem.html')
 
-@app.route('/restaurant/restaurant_id/menu/menu_id/edit')
+@app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/edit')
 def editMenuItem():
 
     return render_template('editMenuItem.html',restaurants="")
 
-@app.route('/restaurant/restaurant_id/menu/menu_id/delete')
+@app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/delete')
 def deleteMenuItem():
     return "delete Menu Item"
 

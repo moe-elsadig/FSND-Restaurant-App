@@ -3,12 +3,14 @@
   <body>
     <h1>Restaurants</h1>
 
-    {% for i in restaurants %}
+    {% for i in menu %}
 
     <div>
 
       <p>{{i.name}}</p>
-
+      <a href='#'>Edit</a>
+      <a href='#'>Delete</a>
+      
     </div>
     {% endfor %}
 
