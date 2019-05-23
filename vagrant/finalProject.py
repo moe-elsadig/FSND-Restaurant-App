@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Restaurant, MenuItem
@@ -43,8 +43,7 @@ def showRestaurants():
 
 @app.route('/restaurant/new/')
 def newRestaurant():
-
-    return render_template('editMenuItem.html',restaurants="")
+    return render_template('newRestaurant.html')
 
 @app.route('/restaurant/restaurant_id/edit/')
 def editRestaurant():
