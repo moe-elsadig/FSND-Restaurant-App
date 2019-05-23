@@ -3,13 +3,16 @@
   <body>
     <h1>Restaurants</h1>
 
+    <a href={{url_for('newRestaurant')}} >Add a new Restaurant</a>
+
     {% for i in restaurants %}
 
     <div>
 
-      <p>{{i.name}}</p>
-      <a href="#" >Edit</a>
-      <a href="#" >Delete</a>
+      <a href={{url_for('showMenu', restaurant_id=i.id)}} ><h3>{{i.name}}</h3></a>
+      <a href={{url_for('editRestaurant', restaurant_id=i.id)}} >Edit</a>
+      </br>
+      <a href={{url_for('deleteRestaurant', restaurant_id=i.id)}} >Delete</a>
 
     </div>
     {% endfor %}
