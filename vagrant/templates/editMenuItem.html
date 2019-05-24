@@ -3,14 +3,65 @@
   <body>
     <h1>Edit Menu Item</h1>
 
-    <form action="{{url_for('editMenuItem', restaurant_id=restaurant_id, menu_id=menu_id)}}" method='post'>
+    <form action="{{url_for('editMenuItem', restaurant_id=restaurant_id, menu_id=menu_id, menu=menu)}}" method='post'>
 
-      <p>Name:</p>
+      <h3>Name:</h3>
+      <input type='text' size='30' name='name' placeholder='{{menu.name}}'>
+    </br></br>
 
-      <input type='text' size='30' name='name' placeholder='Menu Item'>
+      <h3>Description:</h3>
+        <input type='text' size='30' name='description' placeholder='{{menu.description}}'>
+    </br></br>
+
+      <h3>Price:</h3>
+      <input type='text' size='30' name='price' placeholder='{{menu.price}}'>
+    </br></br>
+
+
+      <h3>Course:</h3>
+      
+      {% if menu.course == 'Appetizer' %}
+        <input type='radio' value='Appetizer' name='course' checked>Appetizer</input>
+        </br>
+      {% else %}
+        <input type='radio' value='Appetizer' name='course'>Appetizer</input>
+        </br>
+      {% endif %}
+
+
+
+      {% if menu.course == 'Entree' %}
+          <input type='radio' value='Entree' name='course' checked>Entree</input>
+        </br>
+      {% else %}
+        <input type='radio' value='Entree' name='course'>Entree</input>
+        </br>
+      {% endif %}
+
+
+
+      {% if menu.course == 'Dessert' %}
+          <input type='radio' value='Dessert' name='course' checked>Dessert</input>
+        </br>
+      {% else %}
+        <input type='radio' value='Dessert' name='course'>Dessert</input>
+        </br>
+      {% endif %}
+
+
+      {% if menu.course == 'Beverage' %}
+          <input type='radio' value='Beverage' name='course' checked>Beverage</input>
+      </br></br></br>
+    {% else %}
+      <input type='radio' value='Beverage' name='course'>Beverage</input>
+      </br>
+    {% endif %}
+
 
       <input type='submit' value='Edit'>
 
+            </br>
+            </br>
       <a href='{{url_for('showMenu', restaurant_id=restaurant_id, menu_id=menu_id)}}' >Cancel</a>
 
       </br>

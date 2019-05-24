@@ -5,11 +5,32 @@
 
     <form action="{{url_for('newMenuItem', restaurant_id=restaurant_id, menu_id=menu_id)}}" method='post'>
 
+    <h3>Name:</h3>
     <input type='text' size='30' name='name' placeholder='Name of the new Menu Item'>
-    <input type='submit' value='Add'>
+  </br></br>
 
+    <h3>Description:</h3>
+      <input type='text' size='30' name='description' placeholder='Description'>
+  </br></br>
+
+    <h3>Price:</h3>
+    <input type='text' size='30' name='price' placeholder='00.00'>
+  </br></br>
+
+
+  <h3>Course:</h3>
+    <input type='radio' value='Appetizer' name='course' checked>Appetizer</input>
     </br>
+      <input type='radio' value='Entree' name='course'>Entree</input>
     </br>
+      <input type='radio' value='Dessert' name='course'>Dessert</input>
+    </br>
+      <input type='radio' value='Beverage' name='course'>Beverage</input>
+  </br></br></br>
+    <input type='submit' value='Create'>
+    </br></br>
+
+
     <a href="{{url_for('showMenu', restaurant_id=restaurant_id)}}">Home</a>
 
   </body>
