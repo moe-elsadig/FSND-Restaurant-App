@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
+
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<meta name="google-signin-client_id" content="448730480648-qj2bgiaqma0tqvh3gbh6c23nokkc669d.apps.googleusercontent.com">
+
+<!-- END PRE-REQUISITES FOR GOOGLE SIGN IN -->
+</head>
+
+
+<body>
+<!-- GOOGLE PLUS SIGN IN BUTTON-->
+
+<div class="g-signin2" data-onsuccess="onSignIn"></div>
+
+<!--END GOOGLE PLUS SIGN IN BUTTON -->
+<div id='result'></div>
+<script>
+  function signInCallBack(authResult){
+    if (authResult['code']) {
+      // Hide the sign-in button now that the user is authorised
+      $('#signinButton').attr('style', 'display: none');
+
+      //send the one-time-use code to the server, if the server responds, write a 'login successful' message to the web page and then redirect back to the main restaurant page
+      $.ajax({
+        type: 'POST',
+        url: '/gconnect?state={{STATE}}',
+        processData: false,
+        contentType: 'application/octet-stream; charset=utf-8',
+        data: authResult['code'],
+        success: function(result) {
+          if (result) {
+            $('#results').html('Login Successful!</br>'+ result + '</br>Reconnecting...')
+            setTimeout(function() {
+              window.location.href = "/restaurant";
+            }, 4000);
+            } else if (authResult['error']) {
+
+              console.log('There was an error: ' + authResult['error']);
+            } else {
+              $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+            }
+        }
+      });
+    }
+  }
+</script>
+  </body>
+
+  </html>
