@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, f
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Restaurant, MenuItem
+from flask import session as login_session
+import random, string
 
 app = Flask(__name__)
 
@@ -11,6 +13,15 @@ Base.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
+
+# create a state token to prevent request forgery
+# store it in the session for later validation
+@app.route('/login')
+def showLogin():
+    state = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in xrange(32))
+    login_session['state'] = state
+    return "The current session is %s" % login_session['state']
 
 @app.route('/')
 @app.route('/restaurants/')
@@ -22,9 +33,6 @@ def showRestaurants():
 def showRestaurantsJSON():
     restaurants = session.query(Restaurant).all()
     return jsonify(Restaurants=[restaurant.serialize for restaurant in restaurants])
-
-
-
 
 @app.route('/restaurant/new/', methods=['POST', 'GET'])
 def newRestaurant():
