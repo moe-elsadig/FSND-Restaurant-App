@@ -4,7 +4,8 @@
   <!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
-  <script>
+
+  <!-- <script>
     function start() {
       gapi.load('auth2', function() {
         auth2 = gapi.auth2.init({
@@ -12,21 +13,43 @@
         });
       });
     }
-  </script>
+  </script> -->
 
 <!-- END PRE-REQUISITES FOR GOOGLE SIGN IN -->
+
+
+
+
 </head>
 
 
 <body>
 <!-- GOOGLE PLUS SIGN IN BUTTON-->
-
-<button id="signinButton">Google Signin</button>
-<div id="result"></div>
-
-
+<!-- *** This one is deprecated *** -->
+<!-- <div id="signinButton">
+          <span class="g-signin"
+            data-scope="openid email"
+            data-clientid="YOUR_CLIENT_ID_GOES_HERE.apps.googleusercontent.com"
+            data-redirecturi="postmessage"
+            data-accesstype="offline"
+            data-cookiepolicy="single_host_origin"
+            data-callback="signInCallback"
+            data-approvalprompt="force">
+          </span>
+        </div> -->
 <!--END GOOGLE PLUS SIGN IN BUTTON -->
-<div id='result'></div>
+
+<!-- Google Sign in  button -->
+<button id="signinButton">Google Signin</button>
+
+
+
+
+
+
+
+
+<!-- <div id='result'></div> -->
 
 <!-- To be reviewed -->
 <!-- <script>
@@ -59,6 +82,11 @@
     auth2.grantOfflineAccess().then(signInCallback);
   });
 </script> -->
+
+
+
+
+
   </body>
 
   </html>

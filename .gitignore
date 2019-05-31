@@ -1,0 +1,6 @@
+# Don't track the content of the following folders
+
+# Don't track the following files
+
+vagrant/client_ID
+
