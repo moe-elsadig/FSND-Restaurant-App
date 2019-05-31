@@ -5,25 +5,31 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
 
-  <!-- <script>
+  <script>
     function start() {
       gapi.load('auth2', function() {
         auth2 = gapi.auth2.init({
-          client_id: '448730480648-qj2bgiaqma0tqvh3gbh6c23nokkc669d.apps.googleusercontent.com'
+          client_id: '448730480648-mj80i385ll7dmstuevp91n2c6mt18voi.apps.googleusercontent.com',
+          // Scopes to request in addition to 'profile' and 'email'
+          //scope: 'additional_scope'
         });
       });
     }
-  </script> -->
+  </script>
 
 <!-- END PRE-REQUISITES FOR GOOGLE SIGN IN -->
-
-
 
 
 </head>
 
 
+
+
+
+
+
 <body>
+
 <!-- GOOGLE PLUS SIGN IN BUTTON-->
 <!-- *** This one is deprecated *** -->
 <!-- <div id="signinButton">
@@ -39,13 +45,58 @@
         </div> -->
 <!--END GOOGLE PLUS SIGN IN BUTTON -->
 
+
+
+
+
+
+
 <!-- Google Sign in  button -->
 <button id="signinButton">Google Signin</button>
+<script>
+  $('#signinButton').click(function() {
+    // signInCallback defined in step 6.
+    auth2.grantOfflineAccess().then(signInCallback);
+  });
+</script>
+<!-- end of Google Sign in  button -->
 
 
 
 
 
+
+
+<!-- To send the authorization code to the server -->
+<script>
+function signInCallback(authResult) {
+  if (authResult['code']) {
+
+    // Hide the sign-in button now that the user is authorized, for example:
+    $('#signinButton').attr('style', 'display: none');
+
+    // Send the code to the server
+    $.ajax({
+      type: 'POST',
+      url: 'http://example.com/storeauthcode',
+      // Always include an `X-Requested-With` header in every AJAX request,
+      // to protect against CSRF attacks.
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      contentType: 'application/octet-stream; charset=utf-8',
+      success: function(result) {
+        // Handle or verify the server response.
+      },
+      processData: false,
+      data: authResult['code']
+    });
+  } else {
+    // There was an error.
+  }
+}
+</script>
+<!-- end of To send the authorization code to the server -->
 
 
 
