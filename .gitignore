@@ -3,4 +3,5 @@
 # Don't track the following files
 
 vagrant/client_ID.py
+vagrant/client_ID.pyc
 vagrant/client_secrets.json

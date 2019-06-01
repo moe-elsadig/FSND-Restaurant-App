@@ -9,7 +9,7 @@
     function start() {
       gapi.load('auth2', function() {
         auth2 = gapi.auth2.init({
-          client_id: '-',
+          client_id: '{{client_ID}}',
           // Scopes to request in addition to 'profile' and 'email'
           //scope: 'additional_scope'
         });
@@ -55,7 +55,8 @@
 <button id="signinButton">Google Signin</button>
 <script>
   $('#signinButton').click(function() {
-    // signInCallback defined in step 6.
+    console.log('signin button clicked \n using client ID: ' + '{{client_ID}}' + '\ncalling signInCallback function...')
+    // call the signInCallback function
     auth2.grantOfflineAccess().then(signInCallback);
   });
 </script>
@@ -71,10 +72,15 @@
 <!-- To send the authorization code to the server -->
 <script>
 function signInCallback(authResult) {
+
+  console.log("Running signInCallback function...")
   if (authResult['code']) {
+
+    console.log("authResult code is not empty" + authResult['code'])
 
     // Hide the sign-in button now that the user is authorized, for example:
     $('#signinButton').attr('style', 'display: none');
+    console.log("hiding signin button")
 
     // Send the code to the server
     $.ajax({
@@ -86,10 +92,12 @@ function signInCallback(authResult) {
         'X-Requested-With': 'XMLHttpRequest'
       },
       contentType: 'application/octet-stream; charset=utf-8',
+
       success: function(result) {
         // Handle or verify the server response.
         $('#result').html('Login Sucessful!</br>' + result + '</br>Redirecting...')
         setTimeout(function(){
+
           window.location.href  = "/restaurants";
         }, 4000);
       },
