@@ -9,7 +9,7 @@
     function start() {
       gapi.load('auth2', function() {
         auth2 = gapi.auth2.init({
-          client_id: '448730480648-mj80i385ll7dmstuevp91n2c6mt18voi.apps.googleusercontent.com',
+          client_id: '-',
           // Scopes to request in addition to 'profile' and 'email'
           //scope: 'additional_scope'
         });
@@ -65,7 +65,8 @@
 
 
 
-
+<!-- Show other data received from the server if the result was Successful -->
+<div id='result'>Result:</div>
 
 <!-- To send the authorization code to the server -->
 <script>
@@ -78,7 +79,7 @@ function signInCallback(authResult) {
     // Send the code to the server
     $.ajax({
       type: 'POST',
-      url: 'http://example.com/storeauthcode',
+      url: '/gconnect?state={{STATE}}',
       // Always include an `X-Requested-With` header in every AJAX request,
       // to protect against CSRF attacks.
       headers: {
@@ -87,12 +88,18 @@ function signInCallback(authResult) {
       contentType: 'application/octet-stream; charset=utf-8',
       success: function(result) {
         // Handle or verify the server response.
+        $('#result').html('Login Sucessful!</br>' + result + '</br>Redirecting...')
+        setTimeout(function(){
+          window.location.href  = "/restaurants";
+        }, 4000);
       },
       processData: false,
       data: authResult['code']
     });
   } else {
     // There was an error.
+    $('#result').html('Failed to make the server-side call</br>check the console and configuration.')
+    console.log('There was an error: ' + authResult['error']);
   }
 }
 </script>
