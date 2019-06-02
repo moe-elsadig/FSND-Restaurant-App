@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
+
+  <script>
+    function start() {
+    console.log('hello')
+      gapi.load('auth2', function() {
+        var revokeAllScopes = function() {
+          auth2.disconnect();
+        }
+
+        auth2 = gapi.auth2.init({
+          client_id: '{{client_ID}}',
+          // Scopes to request in addition to 'profile' and 'email'
+          //scope: 'additional_scope'
+        });
+
+
+        console.log('hello')
+
+      });
+    }
+  </script>
+
+<!-- END PRE-REQUISITES FOR GOOGLE SIGN IN -->
+
+
+</head>
+ok
+{{revokeAllScopes}}
+ok
+
+
+
+
+
+<body>
+  </body>
+
+  </html>

@@ -5,3 +5,4 @@
 vagrant/client_ID.py
 vagrant/client_ID.pyc
 vagrant/client_secrets.json
+vagrant/credentials.txt

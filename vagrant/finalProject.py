@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Restaurant, MenuItem
 from flask import session as login_session
 import random, string
-from oauth2client.client import flow_from_clientsecrets
+from oauth2client.client import flow_from_clientsecrets, GoogleCredentials, OAuth2Credentials
 from oauth2client.client import FlowExchangeError
 import httplib2
 import json
@@ -27,7 +27,6 @@ Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
-
 
 # To be reviewed due to the deprecation of G+ Login
 
@@ -78,8 +77,8 @@ def showLogin():
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     # Validate state token
-    print('*********\n\n\n\n' + request.args.get('state') + '\n\n\n\n **************')
-    print('*********\n\n\n\n' + login_session['state'] + '\n\n\n\n **************')
+    # print('*********\n\n\n\n' + request.args.get('state') + '\n\n\n\n **************')
+    # print('*********\n\n\n\n' + login_session['state'] + '\n\n\n\n **************')
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state token'), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -87,7 +86,7 @@ def gconnect():
     # If this request does not have `X-Requested-With` header, this could be a CSRF
     if not request.headers.get('X-Requested-With'):
 
-        print('*********\n\n\n\n' + "X-header not there" + '\n\n\n\n **************')
+        # print('*********\n\n\n\n' + "X-header not there" + '\n\n\n\n **************')
         abort(403)
 
     # Obtain authorization code
@@ -98,7 +97,9 @@ def gconnect():
         oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
-        print(credentials)
+        f = open('credentials.txt', 'w')
+        f.write(credentials.access_token)
+        f.close()
     except FlowExchangeError:
         response = make_response(
             json.dumps('Failed to upgrade the authorization code.'), 401)
@@ -107,6 +108,7 @@ def gconnect():
 
     # Check that the access token is valid.
     access_token = credentials.access_token
+    print("access_token: " + access_token)
     url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
            % access_token)
     h = httplib2.Http()
@@ -167,6 +169,45 @@ def gconnect():
     print "done!"
     return output
 
+# DISCONNECT - Revoke a current user's token and reset their login-session.
+@app.route('/gdisconnect/')
+def gdisconnect():
+    print('hello')
+    return render_template('logout.html', client_ID = CLIENT_ID)
+    # f = open('credentials.txt', 'r')
+    # access_token = f.read()
+    # print("access_token: " + access_token)
+    # # print("disconnect credentials_json_file" + str(credentials_json_file))
+    # # print("disconnect credentials_json_file.from_json()" + str(credentials_json_file.from_json()))
+    # # Only disconnect a connected user.
+    # # credentials.access_token.from_json(credentials_json_file)
+    #
+    # # if credentials is None:
+    # #     response = make_response(json.dumps('Current user is not connected.'), 401)
+    # #     response.headers['Content-Type'] = 'application/json'
+    # #     return response
+    # # Execute HTTP GET request to revoke current token.
+    # url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+    # h = httplib2.Http()
+    # result = h.request(url, 'GET')[0]
+    #
+    # if result['status'] == '200':
+    #     # Reset the user's session.
+    #     del login_session['credentials']
+    #     del login_session['google_user_id']
+    #     del login_session['username']
+    #     del login_session['email']
+    #     del login_session['picture']
+    #
+    #     response = make_response(json.dumps('Successfully Disconnected.'), 200)
+    #     response.headers['Content-Type'] = 'application/json'
+    #     return response
+    # else:
+    #
+    #     # For whatever reason, the given token was invalid.
+    #     response = make_response(json.dumps('Failed to revoke the token for this user'), 400)
+    #     response.headers['Content-Type'] = 'application/json'
+        # return response
 
 @app.route('/')
 @app.route('/restaurants/')
