@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, Restaurant, MenuItem
+from database_setup import Base, Restaurant, MenuItem, User
 from flask import session as login_session
 import random, string
 from oauth2client.client import flow_from_clientsecrets, GoogleCredentials, OAuth2Credentials
@@ -59,9 +59,6 @@ def gconnect():
         oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
-        f = open('credentials.txt', 'w')
-        f.write(credentials.access_token)
-        f.close()
     except FlowExchangeError:
         response = make_response(
             json.dumps('Failed to upgrade the authorization code.'), 401)
@@ -121,6 +118,15 @@ def gconnect():
     login_session['email'] = data['email']
 
     output = ''
+    # See if the user already exists, if not, create a new user
+    if getUserID(login_session['email']) != None:
+        print("\n\nCreating a new user... \n\n")
+        new_user_id = createUser(login_session)
+        output += '<h2>A new user account has been created for you with the following information: %s </h2> </br></br></br></br>' % getUserInfo(new_user_id)
+
+
+
+
     output += '<h1>Welcome, '
     output += login_session['username']
     output += '!</h1>'
@@ -179,7 +185,7 @@ def newRestaurant():
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
-        restaurant = Restaurant(name=request.form['name'])
+        restaurant = Restaurant(name=request.form['name'], user_id = login_session['user_id'])
         session.add(restaurant)
         session.commit()
         flash('New Restaurant Created!')
@@ -236,7 +242,7 @@ def newMenuItem(restaurant_id):
         return redirect('/login')
     if request.method == 'POST':
         if request.form['name']:
-            menuItem = MenuItem(name=request.form['name'],course=request.form['course'],description=request.form['description'],price= "$"+request.form['price'], restaurant_id=restaurant_id)
+            menuItem = MenuItem(name=request.form['name'],course=request.form['course'],description=request.form['description'],price= "$"+request.form['price'], restaurant_id=restaurant_id, user_id=login_session['user_id'])
             session.add(menuItem)
             session.commit()
             flash('Menu Item Created!')
@@ -285,6 +291,24 @@ def deleteMenuItem(restaurant_id, menu_id):
 def MenuItemJSON(restaurant_id, menu_id):
     item = session.query(MenuItem).filter_by(id=menu_id).one()
     return jsonify(MenuItem=[item.serialize])
+
+def createUser(login_session):
+    newUser = User(name = login_session['username'], email = login_session['email'], picture = login_session['picture'])
+    session.add(newUser)
+    session.commit()
+    user = session.query(User).filter_by(email = login_session['email']).one()
+    return user.id
+
+def getUserInfo(user_id):
+    user = session.query(User).filter_by(id=user_id).one()
+    return user
+
+def getUserID(email):
+    try:
+        user = session.query(User).filter_by(email=email).one()
+        return user.id
+    except:
+        return None
 
 
 if __name__ == '__main__':
