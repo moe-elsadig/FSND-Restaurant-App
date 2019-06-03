@@ -23,39 +23,14 @@
 </head>
 
 
-
-
-
-
-
 <body>
-
-<!-- GOOGLE PLUS SIGN IN BUTTON-->
-<!-- *** This one is deprecated *** -->
-<!-- <div id="signinButton">
-          <span class="g-signin"
-            data-scope="openid email"
-            data-clientid="YOUR_CLIENT_ID_GOES_HERE.apps.googleusercontent.com"
-            data-redirecturi="postmessage"
-            data-accesstype="offline"
-            data-cookiepolicy="single_host_origin"
-            data-callback="signInCallback"
-            data-approvalprompt="force">
-          </span>
-        </div> -->
-<!--END GOOGLE PLUS SIGN IN BUTTON -->
-
-
-
-
-
 
 
 <!-- Google Sign in  button -->
 <button id="signinButton">Google Signin</button>
+
 <script>
   $('#signinButton').click(function() {
-    console.log('signin button clicked \n using client ID: ' + '{{client_ID}}' + '\ncalling signInCallback function...')
     // call the signInCallback function
     auth2.grantOfflineAccess().then(signInCallback);
   });
@@ -67,20 +42,16 @@
 
 
 <!-- Show other data received from the server if the result was Successful -->
-<div id='result'>Result:</div>
+<div id='result'></div>
 
 <!-- To send the authorization code to the server -->
 <script>
 function signInCallback(authResult) {
 
-  console.log("Running signInCallback function...")
   if (authResult['code']) {
-
-    console.log("authResult code is not empty" + authResult['code'])
 
     // Hide the sign-in button now that the user is authorized, for example:
     $('#signinButton').attr('style', 'display: none');
-    console.log("hiding signin button")
 
     // Send the code to the server
     $.ajax({
@@ -98,59 +69,20 @@ function signInCallback(authResult) {
         $('#result').html('Login Sucessful!</br>' + result + '</br>Redirecting...')
         setTimeout(function(){
 
-          window.location.href  = "/restaurants";
-        }, 4000);
+          window.location.href  = "/";
+        }, 2000);
       },
       processData: false,
       data: authResult['code']
     });
   } else {
     // There was an error.
-    $('#result').html('Failed to make the server-side call</br>check the console and configuration.')
     console.log('There was an error: ' + authResult['error']);
+    $('#result').html('Failed to make a server-side call. Check your configuration and console.');
   }
 }
 </script>
 <!-- end of To send the authorization code to the server -->
-
-
-
-<!-- <div id='result'></div> -->
-
-<!-- To be reviewed -->
-<!-- <script>
-  $('#signinButton').click(function() {
-    function signInCallback(authResult){
-      if (authResult['code']){
-        $('#signinButton').attr('style', 'display: none');
-        $.ajax({
-          type: 'POST',
-          url: '/gconnect?state={{STATE}}',
-          headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-          },
-          contentType: 'application/octet-stream; charset=utf-8',
-          success:function(result){
-            $('#result').html('Login Successful!</br>'+ result + '</br>Redirecting...')
-                 setTimeout(function() {
-                  window.location.href = "/";
-                 }, 2000);
-          },
-          processData:false,
-          data:authResult['code']
-        });
-      } else{
-        // handle error
-        console.log('There was an error: ' + authResult['error']);
-        $('#result').html('Failed to make a server-side call. Check your configuration and console.');
-      }
-    }
-    auth2.grantOfflineAccess().then(signInCallback);
-  });
-</script> -->
-
-
-
 
 
   </body>
