@@ -22,7 +22,7 @@ APPLICATION_NAME = "Restaurant Menu Application"
 
 
 # Connect to Database and create database session
-engine = create_engine('sqlite:///restaurantmenu.db')
+engine = create_engine('sqlite:///restaurantmenu.db',connect_args={'check_same_thread': False})
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
@@ -40,53 +40,15 @@ def showLogin():
     # return "The current session state is %s" % login_session['state']
     return render_template('login.html', STATE=state, client_ID=CLIENT_ID)
 
-# Google  Signin
-# from apiclient import discovery
-# import httplib2
-# from oauth2client import client
-#
-# # (Receive auth_code by HTTPS POST)
-#
-#
-# # If this request does not have `X-Requested-With` header, this could be a CSRF
-# if not request.headers.get('X-Requested-With'):
-#     abort(403)
-#
-# # Set path to the Web application client_secret_*.json file you downloaded from the
-# # Google API Console: https://console.developers.google.com/apis/credentials
-# CLIENT_SECRET_FILE = '/path/to/client_secret.json'
-#
-# # Exchange auth code for access token, refresh token, and ID token
-# credentials = client.credentials_from_clientsecrets_and_code(
-#     CLIENT_SECRET_FILE,
-#     ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
-#     auth_code)
-#
-# # Call Google API
-# http_auth = credentials.authorize(httplib2.Http())
-# drive_service = discovery.build('drive', 'v3', http=http_auth)
-# appfolder = drive_service.files().get(fileId='appfolder').execute()
-#
-# # Get profile info from ID token
-# userid = credentials.id_token['sub']
-# email = credentials.id_token['email']
-
-
-#
-#
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     # Validate state token
-    # print('*********\n\n\n\n' + request.args.get('state') + '\n\n\n\n **************')
-    # print('*********\n\n\n\n' + login_session['state'] + '\n\n\n\n **************')
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state token'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
     # If this request does not have `X-Requested-With` header, this could be a CSRF
     if not request.headers.get('X-Requested-With'):
-
-        # print('*********\n\n\n\n' + "X-header not there" + '\n\n\n\n **************')
         abort(403)
 
     # Obtain authorization code
@@ -172,42 +134,34 @@ def gconnect():
 # DISCONNECT - Revoke a current user's token and reset their login-session.
 @app.route('/gdisconnect/')
 def gdisconnect():
-    print('hello')
-    return render_template('logout.html', client_ID = CLIENT_ID)
-    # f = open('credentials.txt', 'r')
-    # access_token = f.read()
-    # print("access_token: " + access_token)
-    # # print("disconnect credentials_json_file" + str(credentials_json_file))
-    # # print("disconnect credentials_json_file.from_json()" + str(credentials_json_file.from_json()))
-    # # Only disconnect a connected user.
-    # # credentials.access_token.from_json(credentials_json_file)
-    #
-    # # if credentials is None:
-    # #     response = make_response(json.dumps('Current user is not connected.'), 401)
-    # #     response.headers['Content-Type'] = 'application/json'
-    # #     return response
-    # # Execute HTTP GET request to revoke current token.
-    # url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
-    # h = httplib2.Http()
-    # result = h.request(url, 'GET')[0]
-    #
-    # if result['status'] == '200':
-    #     # Reset the user's session.
-    #     del login_session['credentials']
-    #     del login_session['google_user_id']
-    #     del login_session['username']
-    #     del login_session['email']
-    #     del login_session['picture']
-    #
-    #     response = make_response(json.dumps('Successfully Disconnected.'), 200)
-    #     response.headers['Content-Type'] = 'application/json'
-    #     return response
-    # else:
-    #
-    #     # For whatever reason, the given token was invalid.
-    #     response = make_response(json.dumps('Failed to revoke the token for this user'), 400)
-    #     response.headers['Content-Type'] = 'application/json'
-        # return response
+    access_token = login_session.get('access_token')
+    if access_token is None:
+        print 'Access Token is None'
+        response = make_response(json.dumps('Current user not connected.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    print '\nIn gdisconnect access token is %s'% access_token
+    print '\nUser name is: '
+    print login_session['username']
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+    h = httplib2.Http()
+    result = h.request(url, 'GET')[0]
+    print '\nresult is \n'
+    print result
+    if result['status'] == '200':
+        del login_session['access_token']
+        del login_session['google_user_id']
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+        response = make_response(json.dumps('Successfully disconnected.'), 200)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    else:
+        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
 
 @app.route('/')
 @app.route('/restaurants/')
@@ -222,6 +176,8 @@ def showRestaurantsJSON():
 
 @app.route('/restaurant/new/', methods=['POST', 'GET'])
 def newRestaurant():
+    if 'username' not in login_session:
+        return redirect('/login')
     if request.method == 'POST':
         restaurant = Restaurant(name=request.form['name'])
         session.add(restaurant)
@@ -233,6 +189,8 @@ def newRestaurant():
 
 @app.route('/restaurant/<int:restaurant_id>/edit/', methods=['POST', 'GET'])
 def editRestaurant(restaurant_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
     if request.method == 'POST':
         if request.form['name']:
@@ -246,6 +204,8 @@ def editRestaurant(restaurant_id):
 
 @app.route('/restaurant/<int:restaurant_id>/delete/', methods=['POST', 'GET'])
 def deleteRestaurant(restaurant_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     if request.method == 'POST':
         restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
         session.delete(restaurant)
@@ -272,6 +232,8 @@ def showMenuJSON(restaurant_id):
 
 @app.route('/restaurant/<int:restaurant_id>/menu/new/', methods=['POST', 'GET'])
 def newMenuItem(restaurant_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     if request.method == 'POST':
         if request.form['name']:
             menuItem = MenuItem(name=request.form['name'],course=request.form['course'],description=request.form['description'],price= "$"+request.form['price'], restaurant_id=restaurant_id)
@@ -284,6 +246,8 @@ def newMenuItem(restaurant_id):
 
 @app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/edit', methods=['POST', 'GET'])
 def editMenuItem(restaurant_id, menu_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     menu = session.query(MenuItem).filter_by(id=menu_id).one()
     if request.method == 'POST':
         if request.form['name']:
@@ -306,6 +270,8 @@ def editMenuItem(restaurant_id, menu_id):
 
 @app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/delete', methods=['POST', 'GET'])
 def deleteMenuItem(restaurant_id, menu_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     if request.method == 'POST':
         menuItem = session.query(MenuItem).filter_by(id=menu_id).one()
         session.delete(menuItem)
