@@ -96,10 +96,14 @@ def gconnect():
 
     stored_access_token = login_session.get('access_token')
     stored_google_user_id = login_session.get('google_user_id')
+    print("\n\n\n\n" + str(google_user_id) + "\n\n\n\n")
+    print("\n\n\n\n" + str(stored_google_user_id) + "\n\n\n\n")
+
     if stored_access_token is not None and google_user_id == stored_google_user_id:
         response = make_response(json.dumps('Current user is already connected.'),
                                  200)
         response.headers['Content-Type'] = 'application/json'
+        # flash(response)
         return response
 
     # Store the access token in the session for later use.
@@ -118,12 +122,18 @@ def gconnect():
     login_session['email'] = data['email']
 
     output = ''
+
+
+
     # See if the user already exists, if not, create a new user
+
+    print("The email showing for the login session is: " + login_session['email'])
+
     if getUserID(login_session['email']) != None:
         print("\n\nCreating a new user... \n\n")
         new_user_id = createUser(login_session)
         output += '<h2>A new user account has been created for you with the following information: %s </h2> </br></br></br></br>' % getUserInfo(new_user_id)
-
+        login_session['user_id'] = new_user_id
 
 
 
@@ -145,7 +155,8 @@ def gdisconnect():
         print 'Access Token is None'
         response = make_response(json.dumps('Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
-        return response
+        print (response)
+        return redirect(url_for('showRestaurants'))
     print '\nIn gdisconnect access token is %s'% access_token
     print '\nUser name is: '
     print login_session['username']
@@ -162,18 +173,26 @@ def gdisconnect():
         del login_session['picture']
         response = make_response(json.dumps('Successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
-        return response
+        return redirect(url_for('showRestaurants'))
     else:
         response = make_response(json.dumps('Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
-        return response
+        print(response)
+        return redirect(url_for('showRestaurants'))
 
 
 @app.route('/')
 @app.route('/restaurants/')
 def showRestaurants():
+
+    log_user = None
+    try:
+        log_user = login_session['google_user_id']
+        print("User: " + str(user))
+    except:
+        print("No user is logged in")
     restaurants = session.query(Restaurant).all()
-    return render_template('restaurants.html',restaurants=restaurants)
+    return render_template('restaurants.html',restaurants=restaurants, log_in_stat=log_user)
 
 @app.route('/restaurants/JSON')
 def showRestaurantsJSON():
@@ -227,7 +246,10 @@ def deleteRestaurant(restaurant_id):
 @app.route('/restaurant/<int:restaurant_id>/menu/')
 def showMenu(restaurant_id):
     menu = session.query(MenuItem).filter_by(restaurant_id=restaurant_id).all()
-    return render_template("menu.html", restaurant_id=restaurant_id, menu=menu)
+    if login_session['google_user_id'] == menu[0].user_id:
+        return render_template("menu.html", restaurant_id=restaurant_id, menu=menu)
+    else:
+        return render_template("publicmenu.html", restaurant_id=restaurant_id, menu=menu)
 
 @app.route('/restaurant/<int:restaurant_id>/menu/JSON')
 def showMenuJSON(restaurant_id):
@@ -306,8 +328,10 @@ def getUserInfo(user_id):
 def getUserID(email):
     try:
         user = session.query(User).filter_by(email=email).one()
+        print("User ID is already available")
         return user.id
     except:
+        print("User ID is not available")
         return None
 
 
