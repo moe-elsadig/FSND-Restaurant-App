@@ -51,7 +51,7 @@ def showRestaurants():
     if 'username' not in login_session:
         return render_template('publicrestaurants.html',restaurants=restaurants)
     else:
-        return render_template('publicrestaurants.html',restaurants=restaurants)
+        return render_template('restaurants.html',restaurants=restaurants,log_in_stat=1)
 
 # Route to: JSON list of the restaurants available to the app
 @app.route('/restaurants/JSON')
@@ -182,16 +182,18 @@ def showMenu(restaurant_id):
     # Obtain the picture for the creator of the restaurant
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
     creator = getUserInfo(restaurant.user_id)
+    creator_id = restaurant.user_id
 
     # Render the restaurant menu page
     # restaurant_id: the id of the restaurant the user clicked
     # menu: the obtained database entry of the menu containing the menu items
     # Check if the user is the owner of the restaurant
-    if login_session['email'] == creator.email:
+    if login_session['user_id'] == creator_id:
 
         # if the user is the owner of the menu_id
         return render_template("menu.html", restaurant_id=restaurant_id, menu=menu, creator=creator)
     else:
+
         # if the user is not the owner of the menu_id
         return render_template("publicmenu.html", restaurant_id=restaurant_id, menu=menu, creator=creator, restaurant=restaurant)
 
@@ -240,8 +242,13 @@ def newMenuItem(restaurant_id):
             # Flash a message to the user that the item addition was sucessful
             flash('Menu Item Created!')
 
-        # return the user to the restaurant menu page
-        return redirect(url_for('showMenu', restaurant_id=restaurant_id))
+            # return the user to the restaurant menu page
+            return redirect(url_for('showMenu', restaurant_id=restaurant_id))
+        else:
+
+            flash ("You must add a name and price")
+            return render_template('newMenuItem.html', restaurant_id=restaurant_id)
+
 
     # If there is no POST request then keep the user on the new page
     else:

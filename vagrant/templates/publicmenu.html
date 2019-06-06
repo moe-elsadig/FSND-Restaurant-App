@@ -1,95 +1,81 @@
-{% extends "menu.html" %}
-{% block content %}
-{% include "header.html" %}
+<html>
+  <head>
+    <link rel=stylesheet type=text/css href="{{url_for('static',filename='styles.css') }}">
+  </head>
 
-	<div class="row divider green">
-		<div class="col-md-12"></div>
-	</div>
-	<div class="row banner menu">
-		<div class="col-md-11 col-md-offset-1 padding-none">
-			<h1>{{ restaurant.name }}
-			<figure class="creator">
-				<img src="{{ creator.picture}}">
-				<figcaption>{{ creator.name }}</figcaption>
-			</figure>
-			</h1>
+  <body>
+    <h1>Menu by: {{creator.name}}</h1>
+    <img src="{{creator.picture}}">
 
-		</div>
-	</div>
-	<div class="row padding-top padding-bottom">
-		<div class="col-md-1"></div>
-		<div class="col-md-11 padding-none">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
 
-		</div>
-		<div class="col-md-7"></div>
-	</div>
-	<div class="row">
-		<div class="col-md-12">
-			{% with messages = get_flashed_messages() %}
-				{% if messages %}
-					<ul>
-						{% for message in messages %}
-							 <li> <strong> {{ message }} </strong> </li>
-						{% endfor %}
-					</ul>
-				{% endif %}
-			{% endwith %}
-		</div>
-	</div>
-	{% if items !=[] %}
-		<div class="row">
-			<div class="col-md-1"></div>
-			<div class="col-md-3">
-				<h2>Appetizers</h2>
-					{% for i in items %}
-						{% if i.course == 'Appetizer' %}
-							<div class="menu-item">
-								<h3>{{i.name}}</h3>
-								<p>{{i.description}}</p>
-								<p class="menu-price">{{i.price}}</p>
+        <ul>
+          {% for message in messages %}
 
-							</div>
-						{% endif %}
-					{% endfor %}
-			</div>
-			<div class="col-md-4">
-				<h2>Entrees</h2>
-					{% for i in items %}
-						{% if i.course == 'Entree' %}
-						<div class="menu-item">
-							<h3>{{i.name}}</h3>
-							<p>{{i.description}}</p>
-							<p class="menu-price">{{i.price}}</p>
+            <li> <strong> {{ message }} </strong> </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
 
-						</div>
-						{% endif %}
-					{% endfor %}
-			</div>
-			<div class="col-md-3">
-				<h2>Desserts</h2>
-					{% for i in items %}
-						{% if i.course == 'Dessert' %}
-						<div class="menu-item">
-							<h3>{{i.name}}</h3>
-							<p>{{i.description}}</p>
-							<p class="menu-price">{{i.price}}</p>
+    <h2>Appetizers</h2>
 
-						</div>
-						{% endif %}
-					{% endfor %}
-				<h2>Beverages</h2>
-					{% for i in items %}
-						{% if i.course == 'Beverage' %}
-						<div class="menu-item">
-							<h3>{{i.name}}</h3>
-							<p>{{i.description}}</p>
-							<p class="menu-price">{{i.price}}</p>
+    {% for i in menu %}
+    {% if i.course == 'Appetizer' %}
+    <div>
+      <h4>{{i.name}}</h4>
+      <p>{{i.description}}</p>
+      <p>{{i.price}}</p>
+</br></br></br></br>
+    </div>
+    {% endif %}
+    {% endfor %}
 
-						</div>
-						{% endif %}
-					{% endfor %}
-			</div>
-			<div class="col-md-1"></div>
-		</div>
-	{% endif %}
-{% endblock %}
+    <h2>Entrees</h2>
+
+    {% for i in menu %}
+    {% if i.course == 'Entree' %}
+    <div>
+      <h4>{{i.name}}</h4>
+      <p>{{i.description}}</p>
+      <p>{{i.price}}</p>
+</br></br></br></br>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+
+    <h2>Desserts</h2>
+
+    {% for i in menu %}
+    {% if i.course == 'Dessert' %}
+    <div>
+      <h4>{{i.name}}</h4>
+      <p>{{i.description}}</p>
+      <p>{{i.price}}</p>
+</br></br></br></br>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+
+    <h2>Beverages</h2>
+
+    {% for i in menu %}
+    {% if i.course == 'Beverage' %}
+    <div>
+      <h4>{{i.name}}</h4>
+      <p>{{i.description}}</p>
+      <p>{{i.price}}</p>
+</br></br></br></br>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    </br>
+    </br>
+    <a href="{{url_for('showRestaurants')}}">Home</a>
+
+  </body>
+</html>
