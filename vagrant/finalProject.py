@@ -32,8 +32,6 @@ session = DBSession()
 @app.route('/restaurants/')
 def showRestaurants():
 
-    # A variable to store the state of a user being logged in
-    log_user = None
     # try to see if a user is currently logged in and assign a value
     # this will help toggle the login/logout buttons on a page
     try:
@@ -48,7 +46,12 @@ def showRestaurants():
     # Render the page
     # restaurants: a list of the restaurants available to the app
     # log_in_stat: the id of the logged in user if available
-    return render_template('restaurants.html',restaurants=restaurants, log_in_stat=log_user)
+
+    # Check to see if a user is currently logged in to access the page
+    if 'username' not in login_session:
+        return render_template('publicrestaurants.html',restaurants=restaurants)
+    else:
+        return render_template('publicrestaurants.html',restaurants=restaurants)
 
 # Route to: JSON list of the restaurants available to the app
 @app.route('/restaurants/JSON')
@@ -63,6 +66,7 @@ def showRestaurantsJSON():
 # Route to: Create a new restaurant page
 @app.route('/restaurant/new/', methods=['POST', 'GET'])
 def newRestaurant():
+
     # Check to see if a user is currently logged in to access the page
     if 'username' not in login_session:
         # If a user is not logged in redirect the user to the login page
@@ -89,13 +93,22 @@ def newRestaurant():
 # Route to: Edit a restaurant page
 @app.route('/restaurant/<int:restaurant_id>/edit/', methods=['POST', 'GET'])
 def editRestaurant(restaurant_id):
+
+    # Obtain the database entry for the selected restaurant
+    # Check if the user is the owner of the restaurant
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    creator_id = restaurant.user_id
+
     # Check to see if a user is currently logged in to access the page
     if 'username' not in login_session:
         # If a user is not logged in redirect the user to the login page
         return redirect('/login')
 
-    # Obtain the database entry for the selected restaurant
-    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    # Check if the user is the owner of the restaurant
+    if login_session['user_id'] != creator_id:
+        # If a wrong user is logged in inform them
+        flash ("You don't have the permission to do that.")
+        return redirect(url_for('showRestaurants'))
 
     # Check to see if there is a POST request from the interface
     if request.method == 'POST':
@@ -121,10 +134,22 @@ def editRestaurant(restaurant_id):
 # Route to: Delete Restaurant Page
 @app.route('/restaurant/<int:restaurant_id>/delete/', methods=['POST', 'GET'])
 def deleteRestaurant(restaurant_id):
+
+    # Obtain the database entry for the selected restaurant
+    # Check if the user is the owner of the restaurant
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    creator_id = restaurant.user_id
+
     # Check to see if a user is currently logged in to access the page
     if 'username' not in login_session:
         # If a user is not logged in redirect the user to the login page
         return redirect('/login')
+
+    # Check if the user is the owner of the restaurant
+    if login_session['user_id'] != creator_id:
+        # If a wrong user is logged in inform them
+        flash ("You don't have the permission to do that.")
+        return redirect(url_for('showRestaurants'))
 
     # Check to see if there is a POST request from the interface
     if request.method == 'POST':
@@ -161,7 +186,14 @@ def showMenu(restaurant_id):
     # Render the restaurant menu page
     # restaurant_id: the id of the restaurant the user clicked
     # menu: the obtained database entry of the menu containing the menu items
-    return render_template("menu.html", restaurant_id=restaurant_id, menu=menu, creator=creator)
+    # Check if the user is the owner of the restaurant
+    if login_session['email'] == creator.email:
+
+        # if the user is the owner of the menu_id
+        return render_template("menu.html", restaurant_id=restaurant_id, menu=menu, creator=creator)
+    else:
+        # if the user is not the owner of the menu_id
+        return render_template("publicmenu.html", restaurant_id=restaurant_id, menu=menu, creator=creator, restaurant=restaurant)
 
 # Route to: JSON list of the restaurant's menu items
 @app.route('/restaurant/<int:restaurant_id>/menu/JSON')
@@ -176,10 +208,21 @@ def showMenuJSON(restaurant_id):
 # Route to: Add a new menu item page
 @app.route('/restaurant/<int:restaurant_id>/menu/new/', methods=['POST', 'GET'])
 def newMenuItem(restaurant_id):
+
+    # Check if the user is the owner of the restaurant
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    creator_id = restaurant.user_id
+
     # Check to see if a user is currently logged in to access the page
     if 'username' not in login_session:
         # If a user is not logged in redirect the user to the login page
         return redirect('/login')
+
+    # Check if the user is the owner of the restaurant
+    if login_session['user_id'] != creator_id:
+        # If a wrong user is logged in inform them
+        flash ("You don't have the permission to do that.")
+        return redirect(url_for('showMenu', restaurant_id=restaurant_id))
 
     # Check to see if there is a POST request from the interface
     if request.method == 'POST':
@@ -207,13 +250,21 @@ def newMenuItem(restaurant_id):
 # Route to: Edit menu item page
 @app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/edit', methods=['POST', 'GET'])
 def editMenuItem(restaurant_id, menu_id):
+
+    # Check if the user is the owner of the restaurant
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    creator_id = restaurant.user_id
+
     # Check to see if a user is currently logged in to access the page
     if 'username' not in login_session:
         # If a user is not logged in redirect the user to the login page
         return redirect('/login')
 
-    # Obtain the database entry of the selected menu item
-    menu = session.query(MenuItem).filter_by(id=menu_id).one()
+    # Check if the user is the owner of the restaurant
+    if login_session['user_id'] != creator_id:
+        # If a wrong user is logged in inform them
+        flash ("You don't have the permission to do that.")
+        return redirect(url_for('showMenu', restaurant_id=restaurant_id))
 
     # Check to see if there is a POST request from the interface
     if request.method == 'POST':
@@ -251,10 +302,21 @@ def editMenuItem(restaurant_id, menu_id):
 # Route to: delete menu item page
 @app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/delete', methods=['POST', 'GET'])
 def deleteMenuItem(restaurant_id, menu_id):
+
+    # Check if the user is the owner of the restaurant
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    creator_id = restaurant.user_id
+
     # Check to see if a user is currently logged in to access the page
     if 'username' not in login_session:
         # If a user is not logged in redirect the user to the login page
         return redirect('/login')
+
+    # Check if the user is the owner of the restaurant
+    if login_session['user_id'] != creator_id:
+        # If a wrong user is logged in inform them
+        flash ("You don't have the permission to do that.")
+        return redirect(url_for('showMenu', restaurant_id=restaurant_id))
 
     # Check to see if there is a POST request from the interface
     if request.method == 'POST':
