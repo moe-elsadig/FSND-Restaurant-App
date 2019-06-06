@@ -154,10 +154,14 @@ def showMenu(restaurant_id):
     # Obtain the current menu database entry from the database
     menu = session.query(MenuItem).filter_by(restaurant_id=restaurant_id).all()
 
+    # Obtain the picture for the creator of the restaurant
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    creator = getUserInfo(restaurant.user_id)
+
     # Render the restaurant menu page
     # restaurant_id: the id of the restaurant the user clicked
     # menu: the obtained database entry of the menu containing the menu items
-    return render_template("menu.html", restaurant_id=restaurant_id, menu=menu)
+    return render_template("menu.html", restaurant_id=restaurant_id, menu=menu, creator=creator)
 
 # Route to: JSON list of the restaurant's menu items
 @app.route('/restaurant/<int:restaurant_id>/menu/JSON')

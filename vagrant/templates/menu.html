@@ -4,7 +4,8 @@
   </head>
 
   <body>
-    <h1>Menu</h1>
+    <h1>Menu by: {{creator.name}}</h1>
+    <img src="{{creator.picture}}">
 
     {% with messages = get_flashed_messages() %}
       {% if messages %}

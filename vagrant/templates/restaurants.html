@@ -30,7 +30,7 @@
     {% for i in restaurants %}
 
     <div>
-
+      {{i.picture}}
       <a href={{url_for('showMenu', restaurant_id=i.id)}} ><h3>{{i.name}}</h3></a>
       <a href={{url_for('editRestaurant', restaurant_id=i.id)}} >Edit</a>
       </br>
